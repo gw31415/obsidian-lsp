@@ -16,6 +16,6 @@
 		"vscode-languageserver-textdocument": "^1.0.8"
 	},
 	"scripts": {
-		"dev": "npx ts-node src/server.ts"
+		"dev": "npx ts-node src/main.ts"
 	}
 }
