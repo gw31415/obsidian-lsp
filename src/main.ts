@@ -9,10 +9,14 @@ import {
 	InitializeParams,
 	MarkupKind,
 } from "vscode-languageserver/node"
+import {
+	Position,
+	Range,
+	TextDocument,
+} from "vscode-languageserver-textdocument"
 import { readFileSync, readdirSync } from "fs"
 import { join, extname } from "path"
 
-import { TextDocument } from "vscode-languageserver-textdocument"
 const connection = createConnection(ProposedFeatures.all)
 const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument)
 
@@ -48,6 +52,46 @@ connection.onInitialize((_params: InitializeParams) => {
 interface ObsidianNote {
 	path: string
 	label: string
+}
+
+/**
+	Returns a Range matching /\[{2}\]{0,2}/ around pos
+*/
+function getAroundBrackets(
+	pos: Position,
+	doc: TextDocument
+): Range | undefined {
+	const offset = doc.offsetAt(pos)
+	const range = {
+		start: { line: pos.line, character: 0 },
+		end: pos,
+	}
+
+	// Detect the last closing brackets to the left of pos
+	let left_hand_side = doc.getText(range)
+	const pos_be = left_hand_side.lastIndexOf("[[")
+	if (pos_be === -1) return undefined
+	left_hand_side = left_hand_side.slice(pos_be + 2)
+	if (left_hand_side.includes("]]") || !/^\S+$/u.test(left_hand_side))
+		return undefined
+	range.start = doc.positionAt(doc.offsetAt(range.start) + pos_be)
+
+	/**
+	 * The 2 characters immediately after the cursor
+	 */
+	const ending_chars = doc.getText({
+		start: doc.positionAt(offset),
+		end: doc.positionAt(offset + 2),
+	})
+	let ending_length = 0
+
+	if (ending_chars.at(0) === "]") {
+		if (ending_chars.at(1) === "]") ending_length = 2
+		else ending_length = 1
+	}
+	range.end = doc.positionAt(doc.offsetAt(range.end) + ending_length)
+
+	return range
 }
 
 connection.onCompletion(
