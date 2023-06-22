@@ -11,8 +11,8 @@ import {
 } from "vscode-languageserver-textdocument"
 
 import { documents } from "../common/documents"
-import { globalConfig } from "../common/config"
-import { ObsidianNote, getContent, getObsidianNotes } from "../common/vault"
+import { ObsidianNote, getObsidianNotes } from "../common/vault"
+import { readFileSync } from "fs"
 
 /**
 	Returns a Range matching /\[{2}.*\]{0,2}/ around pos
@@ -63,11 +63,11 @@ export function onCompletion(
 	const range = getAroundBrackets(textDocumentPosition.position, doc)
 	if (undefined === range) return []
 
-	return getObsidianNotes(globalConfig.obsidianVault).map((value) => {
-		const newText = `[[${value.label}]]`
+	return getObsidianNotes().map((note) => {
+		const newText = note.getWikiLink()
 
 		return {
-			data: value,
+			data: note,
 			label: newText,
 			kind: CompletionItemKind.Reference,
 			textEdit: {
@@ -82,7 +82,7 @@ export function onCompletionResolve(item: CompletionItem): CompletionItem {
 	const note: ObsidianNote = item.data
 	item.documentation = {
 		kind: MarkupKind.Markdown,
-		value: getContent(note),
+		value: readFileSync(note.uri.fsPath).toString(),
 	}
 	return item
 }

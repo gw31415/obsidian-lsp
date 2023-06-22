@@ -1,7 +1,7 @@
 import { Position, TextDocument } from "vscode-languageserver-textdocument"
 import { HoverParams, MarkupKind } from "vscode-languageserver/node"
 import { documents } from "../common/documents"
-import { getContent, getObsidianNoteFromWikiLink } from "../common/vault"
+import { getObsidianNoteFromWikiLink } from "../common/vault"
 
 /**
 	Returns the inner string matching /\[{2}.*\]{0,2}/ around pos
@@ -42,11 +42,11 @@ export function onHover(params: HoverParams) {
 	if (wikilink === undefined) return undefined
 	const note = getObsidianNoteFromWikiLink(wikilink)
 	if (note === undefined) return undefined
-	const content = getContent(note)
+
 	return {
 		contents: {
 			kind: MarkupKind.Markdown,
-			value: `${content}`,
+			value: `${note.content}`,
 		},
 	}
 }
