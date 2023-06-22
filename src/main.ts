@@ -7,7 +7,9 @@ import {
 	TextDocumentPositionParams,
 	TextDocumentSyncKind,
 	InitializeParams,
+	MarkupKind,
 } from "vscode-languageserver/node"
+import { readFileSync, readdirSync } from "fs"
 import { join, extname } from "path"
 
 import { TextDocument } from "vscode-languageserver-textdocument"
@@ -43,6 +45,11 @@ connection.onInitialize((_params: InitializeParams) => {
 	}
 })
 
+interface ObsidianNote {
+	path: string
+	label: string
+}
+
 connection.onCompletion(
 	(textDocumentPosition: TextDocumentPositionParams): CompletionItem[] => {
 		const doc = documents.get(textDocumentPosition.textDocument.uri)!
@@ -66,6 +73,13 @@ connection.onCompletion(
 )
 
 connection.onCompletionResolve((item: CompletionItem): CompletionItem => {
+	const note: ObsidianNote = item.data
+	item.documentation = {
+		kind: MarkupKind.Markdown,
+		value: readFileSync(
+			join(globalSettings.obsidianVault, note.path)
+		).toString(),
+	}
 	return item
 })
 

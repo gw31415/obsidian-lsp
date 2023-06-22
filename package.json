@@ -12,6 +12,7 @@
 		"url": "http://github.com/gw31415/lsp-obsidian"
 	},
 	"dependencies": {
+		"@types/node": "^20.3.1",
 		"vscode-languageserver": "^8.1.0",
 		"vscode-languageserver-textdocument": "^1.0.8"
 	},
