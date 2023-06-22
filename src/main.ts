@@ -8,10 +8,29 @@ import {
 	TextDocumentSyncKind,
 	InitializeParams,
 } from "vscode-languageserver/node"
+import { join, extname } from "path"
 
 import { TextDocument } from "vscode-languageserver-textdocument"
 const connection = createConnection(ProposedFeatures.all)
 const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument)
+
+interface Settings {
+	obsidianVault: string
+}
+const defaultSettings: Settings = {
+	obsidianVault: join(
+		`${process.env[process.platform === "win32" ? "USERPROFILE" : "HOME"]}`,
+		"Documents",
+		"Obsidian Vault"
+	),
+}
+let globalSettings: Settings = defaultSettings
+
+connection.onDidChangeConfiguration((change) => {
+	globalSettings = <Settings>(change.settings.obsidian || defaultSettings)
+	// Revalidate all open text documents
+	// documents.all().forEach(validateTextDocument);
+})
 
 connection.onInitialize((_params: InitializeParams) => {
 	return {
