@@ -20,20 +20,20 @@ import { join, extname } from "path"
 const connection = createConnection(ProposedFeatures.all)
 const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument)
 
-interface Settings {
+interface Config {
 	obsidianVault: string
 }
-const defaultSettings: Settings = {
+const defaultConfig: Config = {
 	obsidianVault: join(
 		`${process.env[process.platform === "win32" ? "USERPROFILE" : "HOME"]}`,
 		"Documents",
 		"Obsidian Vault"
 	),
 }
-let globalSettings: Settings = defaultSettings
+let globalConfig: Config = defaultConfig
 
 connection.onDidChangeConfiguration((change) => {
-	globalSettings = <Settings>(change.settings.obsidian || defaultSettings)
+	globalConfig = <Config>(change.settings.obsidian || defaultConfig)
 	// Revalidate all open text documents
 	// documents.all().forEach(validateTextDocument);
 })
@@ -126,7 +126,7 @@ connection.onCompletion(
 		const range = getAroundBrackets(textDocumentPosition.position, doc)
 		if (undefined === range) return []
 
-		return getObsidianNotes(globalSettings.obsidianVault).map((value) => {
+		return getObsidianNotes(globalConfig.obsidianVault).map((value) => {
 			const newText = `[[${value.label}]]`
 
 			return {
@@ -147,7 +147,7 @@ connection.onCompletionResolve((item: CompletionItem): CompletionItem => {
 	item.documentation = {
 		kind: MarkupKind.Markdown,
 		value: readFileSync(
-			join(globalSettings.obsidianVault, note.path)
+			join(globalConfig.obsidianVault, note.path)
 		).toString(),
 	}
 	return item
