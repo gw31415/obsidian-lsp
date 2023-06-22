@@ -13,14 +13,16 @@ import { TextDocument } from "vscode-languageserver-textdocument"
 const connection = createConnection(ProposedFeatures.all)
 const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument)
 
-connection.onInitialize((_params: InitializeParams) => ({
-	capabilities: {
-		textDocumentSync: TextDocumentSyncKind.Incremental,
-		completionProvider: {
-			resolveProvider: true,
+connection.onInitialize((_params: InitializeParams) => {
+	return {
+		capabilities: {
+			textDocumentSync: TextDocumentSyncKind.Incremental,
+			completionProvider: {
+				resolveProvider: true,
+			},
 		},
-	},
-}))
+	}
+})
 
 connection.onCompletion(
 	(textDocumentPosition: TextDocumentPositionParams): CompletionItem[] => {
