@@ -7,6 +7,7 @@ import { connection } from "./common/connection"
 import { documents } from "./common/documents"
 
 import { onCompletion, onCompletionResolve } from "./handler/completion"
+import { onHover } from "./handler/hover"
 
 connection.onInitialize((_params: InitializeParams) => {
 	return {
@@ -15,12 +16,14 @@ connection.onInitialize((_params: InitializeParams) => {
 			completionProvider: {
 				resolveProvider: true,
 			},
+			hoverProvider: true,
 		},
 	}
 })
 
 connection.onCompletion(onCompletion)
 connection.onCompletionResolve(onCompletionResolve)
+connection.onHover(onHover)
 
 documents.listen(connection)
 connection.listen()

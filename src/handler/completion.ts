@@ -12,12 +12,10 @@ import {
 
 import { documents } from "../common/documents"
 import { globalConfig } from "../common/config"
-import { ObsidianNote, getObsidianNotes } from "../common/vault"
-import { readFileSync } from "fs"
-import { join } from "path"
+import { ObsidianNote, getContent, getObsidianNotes } from "../common/vault"
 
 /**
-	Returns a Range matching /\[{2}\]{0,2}/ around pos
+	Returns a Range matching /\[{2}.*\]{0,2}/ around pos
 */
 function getAroundBrackets(
 	pos: Position,
@@ -84,9 +82,7 @@ export function onCompletionResolve(item: CompletionItem): CompletionItem {
 	const note: ObsidianNote = item.data
 	item.documentation = {
 		kind: MarkupKind.Markdown,
-		value: readFileSync(
-			join(globalConfig.obsidianVault, note.path)
-		).toString(),
+		value: getContent(note),
 	}
 	return item
 }
