@@ -8,6 +8,7 @@ import { documents } from "./common/documents"
 
 import { onCompletion, onCompletionResolve } from "./handler/completion"
 import { onHover } from "./handler/hover"
+import { onDefinition } from "./handler/definition"
 
 connection.onInitialize((_params: InitializeParams) => {
 	return {
@@ -17,12 +18,14 @@ connection.onInitialize((_params: InitializeParams) => {
 				resolveProvider: true,
 			},
 			hoverProvider: true,
+			definitionProvider: true,
 		},
 	}
 })
 
 connection.onCompletion(onCompletion)
 connection.onCompletionResolve(onCompletionResolve)
+connection.onDefinition(onDefinition)
 connection.onHover(onHover)
 
 documents.listen(connection)
