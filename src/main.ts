@@ -54,6 +54,30 @@ interface ObsidianNote {
 	label: string
 }
 
+function getObsidianNotes(dirPath: string): ObsidianNote[] {
+	const path2Note = (path: string) => ({
+		path,
+		label: path.slice(0, -extname(path).length),
+	})
+	const allDirents = readdirSync(dirPath, { withFileTypes: true })
+
+	const relative_paths = []
+	for (const dirent of allDirents) {
+		if (dirent.isDirectory()) {
+			const subdir = join(dirPath, dirent.name)
+			relative_paths.push(
+				...getObsidianNotes(subdir).map((name) => ({
+					...name,
+					relative_path: join(subdir, name.path),
+				}))
+			)
+		} else if (dirent.isFile() && [".md"].includes(extname(dirent.name))) {
+			relative_paths.push(path2Note(dirent.name))
+		}
+	}
+	return relative_paths
+}
+
 /**
 	Returns a Range matching /\[{2}\]{0,2}/ around pos
 */
@@ -98,21 +122,23 @@ connection.onCompletion(
 	(textDocumentPosition: TextDocumentPositionParams): CompletionItem[] => {
 		const doc = documents.get(textDocumentPosition.textDocument.uri)!
 
-		// text contains string in [[]].
-		let text = doc.getText({
-			start: { line: textDocumentPosition.position.line, character: 0 },
-			end: textDocumentPosition.position,
-		})
-		const pos_be = text.lastIndexOf("[[")
-		if (pos_be === -1) return []
-		text = text.slice(pos_be + 2)
-		if (text.includes("]]") || !/^\S+$/u.test(text)) return []
+		// check cursor in brackets
+		const range = getAroundBrackets(textDocumentPosition.position, doc)
+		if (undefined === range) return []
 
-		const labels = ["TypeScript", "JavaScript"]
-		return labels.map((value) => ({
-			label: value,
-			kind: CompletionItemKind.Reference,
-		}))
+		return getObsidianNotes(globalSettings.obsidianVault).map((value) => {
+			const newText = `[[${value.label}]]`
+
+			return {
+				data: value,
+				label: newText,
+				kind: CompletionItemKind.Reference,
+				textEdit: {
+					range,
+					newText,
+				},
+			}
+		})
 	}
 )
 
