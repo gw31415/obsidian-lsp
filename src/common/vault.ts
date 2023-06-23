@@ -3,7 +3,11 @@ import { basename, extname, join, resolve } from "path"
 import { URI } from "vscode-uri"
 import { globalConfig } from "./config"
 import { Position, TextDocument } from "vscode-languageserver-textdocument"
+import { connection } from "./connection"
 
+/**
+	Class representing Obsidian documents
+ */
 export class ObsidianNote {
 	readonly uri: URI
 	constructor(path: string) {
@@ -22,8 +26,13 @@ export class ObsidianNote {
 
 /**
 	Returns the inner string matching /\[{2}.*\]{0,2}/ around pos
+	@param pos Cursor position
+	@param doc Document
 */
-export function getWikiLink(pos: Position, doc: TextDocument): string | undefined {
+export function getWikiLink(
+	pos: Position,
+	doc: TextDocument
+): string | undefined {
 	// Detect the last closing brackets to the left of pos
 	let left_hand_side = doc.getText({
 		start: { line: pos.line, character: 0 },
@@ -51,6 +60,9 @@ export function getWikiLink(pos: Position, doc: TextDocument): string | undefine
 	return left_hand_side + right_hand_side
 }
 
+/**
+	convert from WikiLink string to ObsidianNote instance.
+*/
 export function getObsidianNoteFromWikiLink(
 	link: string
 ): ObsidianNote | undefined {
@@ -66,23 +78,33 @@ export function getObsidianNoteFromWikiLink(
 	return new ObsidianNote(join(globalConfig.obsidianVault, `${split[0]}.md`))
 }
 
-export function getObsidianNotes(): ObsidianNote[] {
-	function rec_getpaths(dirPath: string): string[] {
+/**
+	All obsidian markdown documents in the workspace.
+*/
+export const ObsidianNotes: ObsidianNote[] = []
+
+/**
+	Reload ObsidianNotes scanning the workspace.
+*/
+export function updateObsidianNotes() {
+	/**
+		A function that recursively searches for .md files.
+		@param dirPath Path to search
+	*/
+	function rec_getmds(dirPath: string) {
 		const allDirents = readdirSync(dirPath, { withFileTypes: true })
-		const relative_paths = []
 		for (const dirent of allDirents) {
 			if (dirent.isDirectory()) {
-				relative_paths.push(...rec_getpaths(join(dirPath, dirent.name)))
+				rec_getmds(join(dirPath, dirent.name))
 			} else if (
 				dirent.isFile() &&
 				[".md"].includes(extname(dirent.name))
 			) {
-				relative_paths.push(join(dirPath, dirent.name))
+				ObsidianNotes.push(new ObsidianNote(join(dirPath, dirent.name)))
 			}
 		}
-		return relative_paths
 	}
-	return rec_getpaths(globalConfig.obsidianVault).map(
-		(path) => new ObsidianNote(path)
-	)
+	rec_getmds(globalConfig.obsidianVault)
 }
+
+connection.onInitialized(updateObsidianNotes)
