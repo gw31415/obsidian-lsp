@@ -1,9 +1,10 @@
 import { readFileSync, readdirSync } from "fs"
 import { basename, extname, join, resolve } from "path"
 import { URI } from "vscode-uri"
-import { globalConfig } from "./config"
 import { Position, TextDocument } from "vscode-languageserver-textdocument"
 import { connection } from "./connection"
+
+let obsidianVault: string | null = null
 
 /**
 	Class representing Obsidian documents
@@ -66,16 +67,15 @@ export function getWikiLink(
 export function getObsidianNoteFromWikiLink(
 	link: string
 ): ObsidianNote | undefined {
+	if (!obsidianVault) return
 	if (!/^\[\[[^\]\[]+\]\]$/.test(link)) return undefined
 	const innerText = link.slice(2, -2)
 	if (!innerText.includes("|")) {
-		return new ObsidianNote(
-			join(globalConfig.obsidianVault, `${innerText}.md`)
-		)
+		return new ObsidianNote(join(obsidianVault, `${innerText}.md`))
 	}
 	const split = innerText.split("|")
 	if (split.length !== 2) return undefined
-	return new ObsidianNote(join(globalConfig.obsidianVault, `${split[0]}.md`))
+	return new ObsidianNote(join(obsidianVault, `${split[0]}.md`))
 }
 
 /**
@@ -86,7 +86,31 @@ export const ObsidianNotes: ObsidianNote[] = []
 /**
 	Reload ObsidianNotes scanning the workspace.
 */
-export function updateObsidianNotes() {
+export async function updateObsidianNotes() {
+	await connection.workspace.getWorkspaceFolders().then((workspaceFolders) => {
+		if (workspaceFolders === null || workspaceFolders === undefined) {
+			connection
+				.sendNotification("window/showMessage", {
+					type: 1,
+					message:
+						"Please specify the workspace to detect Obsidian Vault.",
+				})
+				.then(() => {
+					process.exit(1)
+				})
+		} else if (workspaceFolders.length !== 1) {
+			connection
+				.sendNotification("window/showMessage", {
+					type: 1,
+					message: "Only one workspace is allowed.",
+				})
+				.then(() => {
+					process.exit(1)
+				})
+		} else {
+			obsidianVault = resolve(URI.parse(workspaceFolders[0].uri).fsPath)
+		}
+	})
 	/**
 		A function that recursively searches for .md files.
 		@param dirPath Path to search
@@ -104,7 +128,5 @@ export function updateObsidianNotes() {
 			}
 		}
 	}
-	rec_getmds(globalConfig.obsidianVault)
+	rec_getmds(obsidianVault!)
 }
-
-connection.onInitialized(updateObsidianNotes)

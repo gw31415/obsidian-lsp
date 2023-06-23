@@ -9,6 +9,7 @@ import { documents } from "./common/documents"
 import { onCompletion, onCompletionResolve } from "./handler/completion"
 import { onHover } from "./handler/hover"
 import { onDefinition } from "./handler/definition"
+import { updateObsidianNotes } from "./common/vault"
 
 connection.onInitialize((_params: InitializeParams) => {
 	return {
@@ -22,6 +23,7 @@ connection.onInitialize((_params: InitializeParams) => {
 		},
 	}
 })
+connection.onInitialized(updateObsidianNotes)
 
 connection.onCompletion(onCompletion)
 connection.onCompletionResolve(onCompletionResolve)
