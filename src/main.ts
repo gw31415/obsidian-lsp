@@ -24,6 +24,7 @@ connection.onInitialize((_params: InitializeParams) => {
 	}
 })
 connection.onInitialized(updateObsidianNotes)
+connection.workspace.onDidChangeWorkspaceFolders(updateObsidianNotes)
 
 connection.onCompletion(onCompletion)
 connection.onCompletionResolve(onCompletionResolve)
