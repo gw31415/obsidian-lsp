@@ -18,6 +18,9 @@
 		"vscode-uri": "^3.0.7"
 	},
 	"scripts": {
-		"dev": "npx ts-node src/main.ts"
+		"dev": "ts-node src/main.ts"
+	},
+	"devDependencies": {
+		"ts-node": "^10.9.1"
 	}
 }
