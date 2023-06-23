@@ -30,7 +30,7 @@ export class ObsidianNote {
 	@param pos Cursor position
 	@param doc Document
 */
-export function getWikiLink(
+export function getWikiLinkUnderPos(
 	pos: Position,
 	doc: TextDocument
 ): string | undefined {
