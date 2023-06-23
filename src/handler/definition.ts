@@ -1,10 +1,10 @@
 import { DefinitionParams, Location } from "vscode-languageserver"
-import { getObsidianNoteFromWikiLink, getWikiLink } from "../common/vault"
+import { getObsidianNoteFromWikiLink, getWikiLinkUnderPos } from "../common/vault"
 import { documents } from "../common/documents"
 
 export function onDefinition(params: DefinitionParams) {
 	const doc = documents.get(params.textDocument.uri)!
-	const wikilink = getWikiLink(
+	const wikilink = getWikiLinkUnderPos(
 		params.position,
 		documents.get(params.textDocument.uri)!
 	)

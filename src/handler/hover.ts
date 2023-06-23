@@ -1,9 +1,9 @@
 import { HoverParams, MarkupKind } from "vscode-languageserver/node"
 import { documents } from "../common/documents"
-import { getObsidianNoteFromWikiLink, getWikiLink } from "../common/vault"
+import { getObsidianNoteFromWikiLink, getWikiLinkUnderPos } from "../common/vault"
 
 export function onHover(params: HoverParams) {
-	const wikilink = getWikiLink(
+	const wikilink = getWikiLinkUnderPos(
 		params.position,
 		documents.get(params.textDocument.uri)!
 	)
