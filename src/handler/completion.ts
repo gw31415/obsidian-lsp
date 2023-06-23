@@ -11,8 +11,7 @@ import {
 } from "vscode-languageserver-textdocument"
 
 import { documents } from "../common/documents"
-import { ObsidianNote, ObsidianNotes } from "../common/vault"
-import { readFileSync } from "fs"
+import { ObsidianNotes } from "../common/vault"
 
 /**
 	Returns a Range matching /\[{2}.*\]{0,2}/ around pos
@@ -67,7 +66,7 @@ export function onCompletion(
 		const newText = note.getWikiLink()
 
 		return {
-			data: note,
+			data: note.content,
 			label: newText,
 			kind: CompletionItemKind.Reference,
 			textEdit: {
@@ -79,10 +78,9 @@ export function onCompletion(
 }
 
 export function onCompletionResolve(item: CompletionItem): CompletionItem {
-	const note: ObsidianNote = item.data
 	item.documentation = {
 		kind: MarkupKind.Markdown,
-		value: readFileSync(note.uri.fsPath).toString(),
+		value: item.data,
 	}
 	return item
 }
