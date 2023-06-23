@@ -20,11 +20,15 @@ connection.onInitialize((_params: InitializeParams) => {
 			},
 			hoverProvider: true,
 			definitionProvider: true,
+			workspace: {
+				workspaceFolders: {
+					supported: true,
+				}
+			},
 		},
 	}
 })
 connection.onInitialized(updateObsidianNotes)
-connection.workspace.onDidChangeWorkspaceFolders(updateObsidianNotes)
 
 connection.onCompletion(onCompletion)
 connection.onCompletionResolve(onCompletionResolve)

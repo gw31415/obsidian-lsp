@@ -34,6 +34,21 @@ export function getWikiLinkUnderPos(
 	pos: Position,
 	doc: TextDocument
 ): string | undefined {
+	// Correct pos to be within [[ ]].
+	const getchar = (pos: Position): string =>
+		doc.getText({
+			start: pos,
+			end: { line: pos.line, character: pos.character + 1 },
+		})
+	if (getchar(pos) === "[")
+		pos = { line: pos.line, character: pos.character + 1 }
+	if (getchar(pos) === "[")
+		pos = { line: pos.line, character: pos.character + 1 }
+	if (getchar(pos) === "]")
+		pos = { line: pos.line, character: pos.character - 1 }
+	if (getchar(pos) === "]")
+		pos = { line: pos.line, character: pos.character - 1 }
+
 	// Detect the last closing brackets to the left of pos
 	let left_hand_side = doc.getText({
 		start: { line: pos.line, character: 0 },
@@ -87,30 +102,34 @@ export const ObsidianNotes: ObsidianNote[] = []
 	Reload ObsidianNotes scanning the workspace.
 */
 export async function updateObsidianNotes() {
-	await connection.workspace.getWorkspaceFolders().then((workspaceFolders) => {
-		if (workspaceFolders === null || workspaceFolders === undefined) {
-			connection
-				.sendNotification("window/showMessage", {
-					type: 1,
-					message:
-						"Please specify the workspace to detect Obsidian Vault.",
-				})
-				.then(() => {
-					process.exit(1)
-				})
-		} else if (workspaceFolders.length !== 1) {
-			connection
-				.sendNotification("window/showMessage", {
-					type: 1,
-					message: "Only one workspace is allowed.",
-				})
-				.then(() => {
-					process.exit(1)
-				})
-		} else {
-			obsidianVault = resolve(URI.parse(workspaceFolders[0].uri).fsPath)
-		}
-	})
+	await connection.workspace
+		.getWorkspaceFolders()
+		.then((workspaceFolders) => {
+			if (workspaceFolders === null || workspaceFolders === undefined) {
+				connection
+					.sendNotification("window/showMessage", {
+						type: 1,
+						message:
+							"Please specify the workspace to detect Obsidian Vault.",
+					})
+					.then(() => {
+						process.exit(1)
+					})
+			} else if (workspaceFolders.length !== 1) {
+				connection
+					.sendNotification("window/showMessage", {
+						type: 1,
+						message: "Only one workspace is allowed.",
+					})
+					.then(() => {
+						process.exit(1)
+					})
+			} else {
+				obsidianVault = resolve(
+					URI.parse(workspaceFolders[0].uri).fsPath
+				)
+			}
+		})
 	/**
 		A function that recursively searches for .md files.
 		@param dirPath Path to search
