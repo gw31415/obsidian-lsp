@@ -3,6 +3,7 @@ import { basename, extname, join, resolve } from "path"
 import { URI } from "vscode-uri"
 import { Position, TextDocument } from "vscode-languageserver-textdocument"
 import { connection } from "./connection"
+import { documents } from "./documents"
 
 let obsidianVault: string | null = null
 
@@ -15,6 +16,8 @@ export class ObsidianNote {
 		this.uri = URI.file(resolve(path))
 	}
 	get content() {
+		const doc = documents.get(this.uri.toString())
+		if (doc) return doc.getText()
 		return readFileSync(this.uri.fsPath).toString()
 	}
 	getWikiLink(label?: string) {
