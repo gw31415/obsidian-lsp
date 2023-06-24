@@ -6,11 +6,9 @@ import {
 import { documents } from "../common/documents"
 
 export function onDefinition(params: DefinitionParams) {
-	const doc = documents.get(params.textDocument.uri)!
-	const wikilink = getWikiLinkUnderPos(
-		params.position,
-		documents.get(params.textDocument.uri)!
-	)
+	const doc = documents.get(params.textDocument.uri)
+	if (!doc) return
+	const wikilink = getWikiLinkUnderPos(params.position, doc)
 	if (wikilink !== null) {
 		try {
 			const note = getObsidianNoteFromWikiLink(wikilink)
@@ -18,6 +16,8 @@ export function onDefinition(params: DefinitionParams) {
 				start: doc.positionAt(0),
 				end: doc.positionAt(0),
 			})
-		} catch {}
+		} catch {
+			return
+		}
 	}
 }

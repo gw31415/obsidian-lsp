@@ -9,10 +9,9 @@ import {
 import { connection } from "../common/connection"
 
 export function onHover(params: HoverParams) {
-	const wikilink = getWikiLinkUnderPos(
-		params.position,
-		documents.get(params.textDocument.uri)!
-	)
+	const doc = documents.get(params.textDocument.uri)
+	if (!doc) return
+	const wikilink = getWikiLinkUnderPos(params.position, doc)
 	if (wikilink !== null) {
 		try {
 			const note = getObsidianNoteFromWikiLink(wikilink)

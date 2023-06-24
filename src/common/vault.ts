@@ -11,8 +11,8 @@ let obsidianVault: string | null = null
 	An error object when ObsidianNotes is not ready.
 */
 export class VaultIsNotReadyError extends Error {
-	constructor(...args: any[]) {
-		super(...args)
+	constructor(args?: string) {
+		super(args)
 		Object.defineProperty(this, "name", {
 			configurable: true,
 			enumerable: false,
@@ -28,8 +28,8 @@ export class VaultIsNotReadyError extends Error {
 	An error object when Obsidian Note is not available or not found.
 */
 export class NoteNotFoundError extends Error {
-	constructor(public uri: URI, ...args: any[]) {
-		super(...args)
+	constructor(public uri: URI, args?: string) {
+		super(args)
 		Object.defineProperty(this, "name", {
 			configurable: true,
 			enumerable: false,
@@ -125,8 +125,8 @@ export function getWikiLinkUnderPos(
 	An error object if the wikilink received is syntactically broken.
 */
 export class WikiLinkBrokenError extends Error {
-	constructor(public broken_link: string, ...args: any[]) {
-		super(...args)
+	constructor(public broken_link: string, args?: string) {
+		super(args)
 		Object.defineProperty(this, "name", {
 			configurable: true,
 			enumerable: false,
@@ -147,7 +147,7 @@ export class WikiLinkBrokenError extends Error {
 */
 export function getObsidianNoteFromWikiLink(link: string): ObsidianNote {
 	if (!obsidianVault) throw new VaultIsNotReadyError()
-	if (!/^\[\[[^\]\[]+\]\]$/.test(link)) throw new WikiLinkBrokenError(link)
+	if (!/^\[\[[^\][]+\]\]$/.test(link)) throw new WikiLinkBrokenError(link)
 	const innerText = link.slice(2, -2)
 	if (!innerText.includes("|")) {
 		return new ObsidianNote(join(obsidianVault, `${innerText}.md`))
@@ -194,6 +194,7 @@ export async function updateObsidianNotes() {
 				)
 			}
 		})
+	if (!obsidianVault) throw new VaultIsNotReadyError()
 	/**
 		A function that recursively searches for .md files.
 		@param dirPath Path to search
@@ -208,5 +209,5 @@ export async function updateObsidianNotes() {
 			}
 		}
 	}
-	rec_getmds(obsidianVault!)
+	rec_getmds(obsidianVault)
 }

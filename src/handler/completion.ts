@@ -56,7 +56,8 @@ function getAroundBrackets(
 export function onCompletion(
 	textDocumentPosition: TextDocumentPositionParams
 ): CompletionItem[] {
-	const doc = documents.get(textDocumentPosition.textDocument.uri)!
+	const doc = documents.get(textDocumentPosition.textDocument.uri)
+	if (doc === undefined) return []
 
 	// check cursor in brackets
 	const range = getAroundBrackets(textDocumentPosition.position, doc)

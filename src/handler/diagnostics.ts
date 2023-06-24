@@ -16,7 +16,7 @@ export function validateWikiLinks(textDocument: TextDocument) {
 	let probrems = 0
 
 	const diagnostics: Diagnostic[] = []
-	for (const m of text.matchAll(/\[\[[^\]\[]+?\]\]/gu)) {
+	for (const m of text.matchAll(/\[\[[^\][]+?\]\]/gu)) {
 		if (m.index === undefined) continue
 		if (probrems++ >= MAX_PROBLEMS_COUNT) break
 		try {

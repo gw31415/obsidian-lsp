@@ -1,7 +1,4 @@
-import {
-	TextDocumentSyncKind,
-	InitializeParams,
-} from "vscode-languageserver/node"
+import { TextDocumentSyncKind } from "vscode-languageserver/node"
 
 import { connection } from "./common/connection"
 import { documents } from "./common/documents"
@@ -12,7 +9,7 @@ import { onDefinition } from "./handler/definition"
 import { updateObsidianNotes } from "./common/vault"
 import { validateWikiLinks } from "./handler/diagnostics"
 
-connection.onInitialize((_params: InitializeParams) => ({
+connection.onInitialize(() => ({
 	capabilities: {
 		textDocumentSync: TextDocumentSyncKind.Incremental,
 		completionProvider: {
