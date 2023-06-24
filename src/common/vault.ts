@@ -60,8 +60,7 @@ export function getWikiLinkUnderPos(
 	const pos_be = left_hand_side.lastIndexOf("[[")
 	if (pos_be === -1) return undefined
 	left_hand_side = left_hand_side.slice(pos_be)
-	if (left_hand_side.includes("]]") || !/^\S+$/u.test(left_hand_side))
-		return undefined
+	if (left_hand_side.includes("]]")) return undefined
 
 	// Detect the last closing brackets to the left of pos
 	let right_hand_side = doc.getText({
@@ -73,8 +72,7 @@ export function getWikiLinkUnderPos(
 	const pos_en = right_hand_side.indexOf("]]")
 	if (pos_en === -1) return undefined
 	right_hand_side = right_hand_side.slice(0, pos_en + 2)
-	if (right_hand_side.includes("[[") || !/^\S+$/u.test(right_hand_side))
-		return undefined
+	if (right_hand_side.includes("[[")) return undefined
 
 	return left_hand_side + right_hand_side
 }
