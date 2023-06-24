@@ -1,5 +1,5 @@
 import { readFileSync, readdirSync } from "fs"
-import { basename, extname, join, resolve } from "path"
+import { basename, join, resolve } from "path"
 import { URI } from "vscode-uri"
 import { Position, TextDocument } from "vscode-languageserver-textdocument"
 import { connection } from "./connection"
@@ -142,7 +142,7 @@ export async function updateObsidianNotes() {
 				rec_getmds(join(dirPath, dirent.name))
 			} else if (
 				dirent.isFile() &&
-				[".md"].includes(extname(dirent.name))
+				dirent.name.slice(-3) === ".md"
 			) {
 				ObsidianNotes.push(new ObsidianNote(join(dirPath, dirent.name)))
 			}
