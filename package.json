@@ -1,6 +1,6 @@
 {
-	"name": "lsp-obsidian",
-	"description": "LSP for operating the note-taking system Obsidian from Vim",
+	"name": "obsidian-lsp",
+	"description": "LSP server for operating the note-taking system Obsidian",
 	"version": "1.0.0",
 	"author": "Amadeus_vn",
 	"license": "MIT",
@@ -9,7 +9,7 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "http://github.com/gw31415/lsp-obsidian"
+		"url": "http://github.com/gw31415/obsidian-lsp"
 	},
 	"dependencies": {
 		"vscode-languageserver": "^8.1.0",
