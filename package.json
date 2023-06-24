@@ -18,7 +18,7 @@
 		"vscode-uri": "^3.0.7"
 	},
 	"scripts": {
-		"prepare": "tsc -p .",
+		"build": "tsc -p .",
 		"dev": "ts-node src/main.ts"
 	},
 	"devDependencies": {
