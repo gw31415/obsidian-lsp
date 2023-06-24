@@ -1,5 +1,7 @@
 # obsidian-lsp : Language Server for Obsidian.md
 
+![Screen record](https://github.com/gw31415/obsidian-lsp/assets/24710985/be3e8a1b-230a-4af0-9a0a-ea2e747eed35)
+
 ## Motivation
 
 [Obsidian.md](https://obsidian.md/) is a fantastic tool that enables you to
