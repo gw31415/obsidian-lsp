@@ -1,3 +1,4 @@
+#! /usr/bin/env node
 import { TextDocumentSyncKind } from "vscode-languageserver/node"
 
 import { connection } from "./common/connection"
