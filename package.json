@@ -7,7 +7,7 @@
 	"engines": {
 		"node": "*"
 	},
-	"bin": "out/main.js",
+	"bin": "obsidian-lsp",
 	"repository": {
 		"type": "git",
 		"url": "http://github.com/gw31415/obsidian-lsp"
@@ -18,7 +18,7 @@
 		"vscode-uri": "^3.0.7"
 	},
 	"scripts": {
-		"build": "tsc -p .",
+		"build": "esbuild --bundle src/main.ts --outfile=obsidian-lsp --minify --platform=node",
 		"dev": "ts-node src/main.ts"
 	},
 	"devDependencies": {
@@ -30,6 +30,6 @@
 		"eslint-plugin-prettier": "^4.2.1",
 		"prettier": "^2.8.8",
 		"ts-node": "^10.9.1",
-		"typescript": "<5.1.0"
+		"esbuild": "^0.18.7"
 	}
 }
