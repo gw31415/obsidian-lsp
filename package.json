@@ -7,7 +7,7 @@
 	"engines": {
 		"node": "*"
 	},
-	"bin": "obsidian-lsp",
+	"bin": "out/main.js",
 	"repository": {
 		"type": "git",
 		"url": "http://github.com/gw31415/obsidian-lsp"
@@ -18,7 +18,7 @@
 		"vscode-uri": "^3.0.7"
 	},
 	"scripts": {
-		"build": "esbuild --bundle src/main.ts --outfile=obsidian-lsp --minify --platform=node",
+		"prepare": "esbuild --bundle src/main.ts --outdir=out --minify --platform=node",
 		"dev": "ts-node src/main.ts"
 	},
 	"devDependencies": {

@@ -1,5 +1,2 @@
 out
-obsidian-lsp
 node_modules
-client/server
-.vscode-test
