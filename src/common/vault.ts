@@ -37,7 +37,7 @@ export function getWikiLinkUnderPos(
 	pos: Position,
 	doc: TextDocument
 ): string | undefined {
-	// Correct pos to be within [[ ]].
+	// Move pos to be inside of [[ ]].
 	const getchar = (pos: Position): string =>
 		doc.getText({
 			start: pos,
