@@ -8,35 +8,79 @@ import { documents } from "./documents"
 let obsidianVault: string | null = null
 
 /**
-	Class representing Obsidian documents
+	An error object when ObsidianNotes is not ready.
+*/
+export class VaultIsNotReadyError extends Error {
+	constructor(...args: any[]) {
+		super(...args)
+		Object.defineProperty(this, "name", {
+			configurable: true,
+			enumerable: false,
+			value: this.constructor.name,
+			writable: true,
+		})
+		if (Error.captureStackTrace)
+			Error.captureStackTrace(this, NoteNotFoundError)
+	}
+}
+
+/**
+	An error object when Obsidian Note is not available or not found.
+*/
+export class NoteNotFoundError extends Error {
+	constructor(public uri: URI, ...args: any[]) {
+		super(...args)
+		Object.defineProperty(this, "name", {
+			configurable: true,
+			enumerable: false,
+			value: this.constructor.name,
+			writable: true,
+		})
+		if (Error.captureStackTrace)
+			Error.captureStackTrace(this, NoteNotFoundError)
+	}
+}
+
+/**
+	Class representing Obsidian documents.
  */
 export class ObsidianNote {
 	readonly uri: URI
 	constructor(path: string) {
 		this.uri = URI.file(resolve(path))
 	}
+	/**
+		Get the content of Obsidian note.
+		Throws NoteNotFoundError if the file is not found.
+	*/
 	get content() {
 		const doc = documents.get(this.uri.toString())
 		if (doc) return doc.getText()
-		return readFileSync(this.uri.fsPath).toString()
+		try {
+			return readFileSync(this.uri.fsPath).toString()
+		} catch {
+			throw new NoteNotFoundError(this.uri)
+		}
 	}
+	/**
+		Get wikilink string refer to this instance.
+	*/
 	getWikiLink(label?: string) {
 		const path = this.uri.fsPath.toString()
-		return `[[${basename(path).slice(0, -3)}${
-			label !== undefined ? `|${label}` : ""
-		}]]`
+		const name = basename(path).slice(0, -3)
+		return `[[${name}${label !== undefined ? `|${label}` : ""}]]`
 	}
 }
 
 /**
 	Returns the inner string matching /\[{2}.*\]{0,2}/ around pos
-	@param pos Cursor position
-	@param doc Document
+	@param pos The cursor position.
+	@param doc The document to refer to.
 */
 export function getWikiLinkUnderPos(
 	pos: Position,
 	doc: TextDocument
-): string | undefined {
+): string | null {
 	// Move pos to be inside of [[ ]].
 	const getchar = (pos: Position): string =>
 		doc.getText({
@@ -58,9 +102,9 @@ export function getWikiLinkUnderPos(
 		end: pos,
 	})
 	const pos_be = left_hand_side.lastIndexOf("[[")
-	if (pos_be === -1) return undefined
+	if (pos_be === -1) return null
 	left_hand_side = left_hand_side.slice(pos_be)
-	if (left_hand_side.includes("]]")) return undefined
+	if (left_hand_side.includes("]]")) return null
 
 	// Detect the last closing brackets to the left of pos
 	let right_hand_side = doc.getText({
@@ -70,27 +114,46 @@ export function getWikiLinkUnderPos(
 		),
 	})
 	const pos_en = right_hand_side.indexOf("]]")
-	if (pos_en === -1) return undefined
+	if (pos_en === -1) return null
 	right_hand_side = right_hand_side.slice(0, pos_en + 2)
-	if (right_hand_side.includes("[[")) return undefined
+	if (right_hand_side.includes("[[")) return null
 
 	return left_hand_side + right_hand_side
 }
 
 /**
-	convert from WikiLink string to ObsidianNote instance.
+	An error object if the wikilink received is syntactically broken.
 */
-export function getObsidianNoteFromWikiLink(
-	link: string
-): ObsidianNote | undefined {
-	if (!obsidianVault) return
-	if (!/^\[\[[^\]\[]+\]\]$/.test(link)) return undefined
+export class WikiLinkBrokenError extends Error {
+	constructor(public broken_link: string, ...args: any[]) {
+		super(...args)
+		Object.defineProperty(this, "name", {
+			configurable: true,
+			enumerable: false,
+			value: this.constructor.name,
+			writable: true,
+		})
+		if (Error.captureStackTrace)
+			Error.captureStackTrace(this, NoteNotFoundError)
+	}
+}
+
+/**
+	convert from WikiLink string to ObsidianNote instance.
+	Throws WikiLinkBrokenError if link is syntactically broken.
+	Run updateObsidianNotes() before call it in order to look-up notes,
+	or throws VaultIsNotReadyError.
+	@param link wikilink string to convert.
+*/
+export function getObsidianNoteFromWikiLink(link: string): ObsidianNote {
+	if (!obsidianVault) throw new VaultIsNotReadyError()
+	if (!/^\[\[[^\]\[]+\]\]$/.test(link)) throw new WikiLinkBrokenError(link)
 	const innerText = link.slice(2, -2)
 	if (!innerText.includes("|")) {
 		return new ObsidianNote(join(obsidianVault, `${innerText}.md`))
 	}
 	const split = innerText.split("|")
-	if (split.length !== 2) return undefined
+	if (split.length !== 2) throw new WikiLinkBrokenError(link)
 	return new ObsidianNote(join(obsidianVault, `${split[0]}.md`))
 }
 
@@ -140,10 +203,7 @@ export async function updateObsidianNotes() {
 		for (const dirent of allDirents) {
 			if (dirent.isDirectory()) {
 				rec_getmds(join(dirPath, dirent.name))
-			} else if (
-				dirent.isFile() &&
-				dirent.name.slice(-3) === ".md"
-			) {
+			} else if (dirent.isFile() && dirent.name.slice(-3) === ".md") {
 				ObsidianNotes.push(new ObsidianNote(join(dirPath, dirent.name)))
 			}
 		}

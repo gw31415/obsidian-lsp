@@ -66,7 +66,7 @@ export function onCompletion(
 		const newText = note.getWikiLink()
 
 		return {
-			data: note.content,
+			data: note.content, // no throws because note is auto generated.
 			label: newText,
 			kind: CompletionItemKind.Reference,
 			textEdit: {
