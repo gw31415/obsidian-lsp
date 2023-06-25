@@ -17,28 +17,61 @@ flexible, all in your editor of choice.
 The Obsidian.md LSP server provides the following main features:
 
 -   [x] `textDocument/completion`: Provides search within the Vault and
-    autocompletion of links, enabling efficient navigation within your wiki.
+        autocompletion of links, enabling efficient navigation within your wiki.
 
 -   [x] `textDocument/publishDiagnostics`: Detects and alerts you of broken or
-    empty links, ensuring the consistency and integrity of your wiki.
+        empty links, ensuring the consistency and integrity of your wiki.
 
 -   [x] `textDocument/definition`: Allows you to jump directly to a page from
-    its link, aiding swift exploration within your wiki.
+        its link, aiding swift exploration within your wiki.
 
 -   [x] `textDocument/hover`: Displays the content of the linked article in a
-    hover-over preview, saving you the need to follow the link.
+        hover-over preview, saving you the need to follow the link.
 
 -   [ ] `textDocument/references`: (Will) display a list of all articles that
-    contain a link to a specific article, helping you understand the context and
-relationships of your notes. This feature is currently under development.
+        contain a link to a specific article, helping you understand the context and
+        relationships of your notes. This feature is currently under development.
 
 -   [ ] `workspace/symbol`: (Will) enable searching for symbols across the
-    entire workspace, helping you quickly locate specific topics or keywords.
-This feature is currently under development.
+        entire workspace, helping you quickly locate specific topics or keywords.
+        This feature is currently under development.
 
 The Obsidian.md LSP server makes your Obsidian usage more potent and efficient.
 You can edit your Obsidian Wiki in your preferred editor, maximising its
 potential.
+
+## How to use?
+
+This is not a plugin itself and does not provide each function directly to the
+editor. If you still want to try it, you can access each function with the
+following settings.
+
+### Neovim
+
+```lua
+{
+    -- this config is for folke/lazy.nvim.
+	"gw31415/obsidian-lsp",
+	ft = "markdown",
+	dependencies = "neovim/nvim-lspconfig",
+	build = "npm i && npm bulid && npm link",
+	config = function()
+		local lspconfig = require('lspconfig')
+		local configs = require('lspconfig.configs')
+		if not configs.obsidian then
+			configs.obsidian = {
+				default_config = {
+					cmd = { "obsidian-lsp", "--stdio" },
+					single_file_support = false,
+					root_dir = lspconfig.util.root_pattern ".obsidian",
+					filetypes = { 'markdown' },
+				},
+			}
+		end
+		lspconfig.obsidian.setup {}
+	end,
+},
+```
 
 ## Related Projects
 
