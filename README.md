@@ -49,19 +49,15 @@ following settings.
 ### Neovim
 
 ```lua
-{
-    -- this config is for folke/lazy.nvim.
-	"gw31415/obsidian-lsp",
-	ft = "markdown",
-	dependencies = "neovim/nvim-lspconfig",
-	build = "npm i && npm bulid && npm link",
-	config = function()
+vim.api.nvim_create_autocmd("BufRead", {
+	pattern = "*.md",
+	callback = function()
 		local lspconfig = require('lspconfig')
 		local configs = require('lspconfig.configs')
 		if not configs.obsidian then
 			configs.obsidian = {
 				default_config = {
-					cmd = { "obsidian-lsp", "--stdio" },
+					cmd = { "npx", "obsidian-lsp", "--", "--stdio" },
 					single_file_support = false,
 					root_dir = lspconfig.util.root_pattern ".obsidian",
 					filetypes = { 'markdown' },
@@ -70,7 +66,7 @@ following settings.
 		end
 		lspconfig.obsidian.setup {}
 	end,
-},
+})
 ```
 
 ## Related Projects
