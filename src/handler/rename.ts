@@ -3,7 +3,7 @@ import {
 	WorkspaceChange,
 	WorkspaceEdit,
 } from "vscode-languageserver"
-import * as matter from "gray-matter"
+import { read, stringify } from "gray-matter"
 import { TextDocument } from "vscode-languageserver-textdocument"
 import { ObsidianNote } from "../common/vault"
 import { URI } from "vscode-uri"
@@ -11,7 +11,7 @@ import { URI } from "vscode-uri"
 export function onRenameRequest(params: RenameParams) {
 	return applyAlias({
 		note: new ObsidianNote(URI.parse(params.textDocument.uri)),
-		alias: params.newName, 
+		alias: params.newName,
 	})
 }
 
@@ -31,7 +31,7 @@ export function applyAlias({
 		1,
 		rawText
 	)
-	const doc_parsed = matter(rawText)
+	const doc_parsed = read(rawText)
 	const frontmatter = doc_parsed.data
 	if (!("title" in frontmatter)) frontmatter["title"] = alias
 	else {
@@ -43,7 +43,7 @@ export function applyAlias({
 			start: doc.positionAt(0),
 			end: doc.positionAt(rawText.length - doc_parsed.content.length),
 		},
-		matter.stringify("", frontmatter).slice(0, -1) // Remove the ending line break
+		stringify("", frontmatter).slice(0, -1) // Remove the ending line break
 	)
 	return change.edit
 }
