@@ -171,7 +171,7 @@ export function parseWikiLink(link: string): {
 /**
 	All obsidian markdown documents in the workspace.
 */
-export const ObsidianNotes: Set<string> = new Set()
+export const ObsidianNoteUrls: Set<string> = new Set()
 
 /**
 	Reload ObsidianNotes scanning the workspace.
@@ -187,7 +187,7 @@ export async function updateObsidianNotes(...paths: string[]) {
 			if (dirent.isDirectory()) {
 				rec_getmds(join(dirPath, dirent.name))
 			} else if (dirent.isFile() && dirent.name.slice(-3) === ".md") {
-				ObsidianNotes.add(
+				ObsidianNoteUrls.add(
 					URI.file(resolve(join(dirPath, dirent.name))).toString()
 				)
 			}
@@ -233,7 +233,7 @@ export async function updateObsidianNotes(...paths: string[]) {
 			if (dirent.isDirectory()) {
 				rec_getmds(path)
 			} else if (dirent.isFile() && path.slice(-3) === ".md") {
-				ObsidianNotes.add(URI.file(resolve(path)).toString())
+				ObsidianNoteUrls.add(URI.file(resolve(path)).toString())
 			}
 		}
 	}

@@ -11,7 +11,7 @@ import {
 } from "vscode-languageserver-textdocument"
 
 import { documents } from "../common/documents"
-import { ObsidianNotes, ObsidianNote } from "../common/vault"
+import { ObsidianNoteUrls, ObsidianNote } from "../common/vault"
 import { URI } from "vscode-uri"
 
 /**
@@ -64,7 +64,7 @@ export function onCompletion(
 	const range = getAroundBrackets(textDocumentPosition.position, doc)
 	if (undefined === range) return []
 
-	return [...ObsidianNotes].map((uri) => {
+	return [...ObsidianNoteUrls].map((uri) => {
 		const note = new ObsidianNote(URI.parse(uri))
 		const newText = note.getWikiLink()
 
