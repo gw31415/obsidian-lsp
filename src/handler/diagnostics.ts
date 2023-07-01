@@ -5,7 +5,7 @@ import { connection } from "../common/connection"
 import { documents } from "../common/documents"
 import {
 	WikiLinkBrokenError,
-	getObsidianNoteFromWikiLink,
+	parseWikiLink,
 } from "../common/vault"
 import { existsSync } from "fs"
 
@@ -20,7 +20,7 @@ export function validateWikiLinks(textDocument: TextDocument) {
 		if (m.index === undefined) continue
 		if (probrems++ >= MAX_PROBLEMS_COUNT) break
 		try {
-			const note = getObsidianNoteFromWikiLink(m[0])
+			const note = parseWikiLink(m[0]).note
 			if (
 				// No editing nor file exists.
 				!(

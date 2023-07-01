@@ -1,22 +1,42 @@
 import {
 	RenameParams,
 	WorkspaceChange,
+	WorkspaceEdit,
 } from "vscode-languageserver"
 import * as matter from "gray-matter"
-import { documents } from "../common/documents"
+import { TextDocument } from "vscode-languageserver-textdocument"
+import { ObsidianNote } from "../common/vault"
+import { URI } from "vscode-uri"
 
 export function onRenameRequest(params: RenameParams) {
-	const doc = documents.get(params.textDocument.uri)
-	if (!doc) return
+	return applyAlias({
+		note: new ObsidianNote(URI.parse(params.textDocument.uri)),
+		alias: params.newName, 
+	})
+}
+
+export function applyAlias({
+	note,
+	alias,
+}: {
+	note: ObsidianNote
+	alias: string
+}): WorkspaceEdit {
 	const change = new WorkspaceChange()
 
-	const rawText = doc.getText()
+	const rawText = note.content
+	const doc: TextDocument = TextDocument.create(
+		note.uri.toString(),
+		"markdown",
+		1,
+		rawText
+	)
 	const doc_parsed = matter(rawText)
 	const frontmatter = doc_parsed.data
-	if (!("title" in frontmatter)) frontmatter["title"] = params.newName
+	if (!("title" in frontmatter)) frontmatter["title"] = alias
 	else {
 		if (!("aliases" in frontmatter)) frontmatter["aliases"] = []
-		frontmatter.aliases.push(params.newName)
+		frontmatter.aliases.push(alias)
 	}
 	change.getTextEditChange(doc.uri).replace(
 		{

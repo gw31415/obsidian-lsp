@@ -11,6 +11,7 @@ import { updateObsidianNotes } from "./common/vault"
 import { validateWikiLinks } from "./handler/diagnostics"
 import { URI } from "vscode-uri"
 import { onRenameRequest } from "./handler/rename"
+import { onCodeAction } from "./handler/codeaction"
 
 connection.onInitialize(() => ({
 	capabilities: {
@@ -21,6 +22,7 @@ connection.onInitialize(() => ({
 		hoverProvider: true,
 		definitionProvider: true,
 		renameProvider: true,
+		codeActionProvider: true,
 		workspace: {
 			workspaceFolders: {
 				supported: true,
@@ -39,6 +41,7 @@ connection.onCompletionResolve(onCompletionResolve)
 connection.onDefinition(onDefinition)
 connection.onRenameRequest(onRenameRequest)
 connection.onHover(onHover)
+connection.onCodeAction(onCodeAction)
 documents.onDidChangeContent((change) => validateWikiLinks(change.document))
 documents.onDidSave((change) =>
 	updateObsidianNotes(URI.parse(change.document.uri).fsPath)

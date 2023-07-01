@@ -3,7 +3,7 @@ import { documents } from "../common/documents"
 import {
 	NoteNotFoundError,
 	WikiLinkBrokenError,
-	getObsidianNoteFromWikiLink,
+	parseWikiLink,
 	getWikiLinkUnderPos,
 } from "../common/vault"
 import { connection } from "../common/connection"
@@ -14,7 +14,7 @@ export function onHover(params: HoverParams) {
 	const wikilink = getWikiLinkUnderPos(params.position, doc)
 	if (wikilink !== null) {
 		try {
-			const note = getObsidianNoteFromWikiLink(wikilink)
+			const note = parseWikiLink(wikilink).note
 
 			return {
 				contents: {

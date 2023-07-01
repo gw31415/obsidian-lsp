@@ -143,20 +143,29 @@ export class WikiLinkBrokenError extends Error {
 	or throws VaultIsNotReadyError.
 	@param link wikilink string to convert.
 */
-export function getObsidianNoteFromWikiLink(link: string): ObsidianNote {
+export function parseWikiLink(link: string): {
+	note: ObsidianNote
+	alias: string | undefined
+} {
 	if (!obsidianVault) throw new VaultIsNotReadyError()
 	if (!/^\[\[[^\][]+\]\]$/.test(link)) throw new WikiLinkBrokenError(link)
 	const innerText = link.slice(2, -2)
 	if (!innerText.includes("|")) {
-		return new ObsidianNote(
-			URI.file(resolve(join(obsidianVault, `${innerText}.md`)))
-		)
+		return {
+			note: new ObsidianNote(
+				URI.file(resolve(join(obsidianVault, `${innerText}.md`)))
+			),
+			alias: undefined,
+		}
 	}
 	const split = innerText.split("|")
 	if (split.length !== 2) throw new WikiLinkBrokenError(link)
-	return new ObsidianNote(
-		URI.file(resolve(join(obsidianVault, `${split[0]}.md`)))
-	)
+	return {
+		note: new ObsidianNote(
+			URI.file(resolve(join(obsidianVault, `${split[0]}.md`)))
+		),
+		alias: split[1],
+	}
 }
 
 /**
@@ -178,7 +187,9 @@ export async function updateObsidianNotes(...paths: string[]) {
 			if (dirent.isDirectory()) {
 				rec_getmds(join(dirPath, dirent.name))
 			} else if (dirent.isFile() && dirent.name.slice(-3) === ".md") {
-				ObsidianNotes.add(URI.file(resolve(join(dirPath, dirent.name))).toString())
+				ObsidianNotes.add(
+					URI.file(resolve(join(dirPath, dirent.name))).toString()
+				)
 			}
 		}
 	}

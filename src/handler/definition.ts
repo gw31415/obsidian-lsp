@@ -1,6 +1,6 @@
 import { DefinitionParams, Location } from "vscode-languageserver"
 import {
-	getObsidianNoteFromWikiLink,
+	parseWikiLink,
 	getWikiLinkUnderPos,
 } from "../common/vault"
 import { documents } from "../common/documents"
@@ -11,7 +11,7 @@ export function onDefinition(params: DefinitionParams) {
 	const wikilink = getWikiLinkUnderPos(params.position, doc)
 	if (wikilink !== null) {
 		try {
-			const note = getObsidianNoteFromWikiLink(wikilink)
+			const note = parseWikiLink(wikilink).note
 			return Location.create(note.uri.toString(), {
 				start: doc.positionAt(0),
 				end: doc.positionAt(0),
