@@ -198,12 +198,14 @@ export async function updateObsidianNotes(...paths: string[]) {
 						const note = new ObsidianNote(URI.parse(uri))
 						const content = note.content // no throws because note is auto generated.
 						const parsed = matter(content)
-						const aliases: (string | undefined)[] = [undefined]
-						if (parsed.data.aliases)
-							aliases.push(...parsed.data.aliases)
-						if (parsed.data.title) aliases.push(parsed.data.title)
+						const aliases: Set<undefined | string> = new Set(
+							parsed.data.aliases
+						)
+						if ("title" in parsed.data)
+							aliases.add(parsed.data.title)
+						aliases.add(undefined)
 
-						return aliases.map((alias) => ({
+						return [...aliases].map((alias) => ({
 							data: parsed.content,
 							label: note.getWikiLink(alias),
 							kind: CompletionItemKind.Reference,
@@ -259,12 +261,14 @@ export async function updateObsidianNotes(...paths: string[]) {
 						const note = new ObsidianNote(URI.parse(uri))
 						const content = note.content // no throws because note is auto generated.
 						const parsed = matter(content)
-						const aliases: (string | undefined)[] = [undefined]
-						if (parsed.data.aliases)
-							aliases.push(...parsed.data.aliases)
-						if (parsed.data.title) aliases.push(parsed.data.title)
+						const aliases: Set<undefined | string> = new Set(
+							parsed.data.aliases
+						)
+						if ("title" in parsed.data)
+							aliases.add(parsed.data.title)
+						aliases.add(undefined)
 
-						return aliases.map((alias) => ({
+						return [...aliases].map((alias) => ({
 							data: parsed.content,
 							label: note.getWikiLink(alias),
 							kind: CompletionItemKind.Reference,
