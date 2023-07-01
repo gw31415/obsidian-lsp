@@ -3,8 +3,8 @@ import {
 	WorkspaceChange,
 	WorkspaceEdit,
 } from "vscode-languageserver"
-import { stringify }  from "gray-matter"
-import * as matter  from "gray-matter"
+import { stringify } from "gray-matter"
+import * as matter from "gray-matter"
 import { TextDocument } from "vscode-languageserver-textdocument"
 import { ObsidianNote } from "../common/vault"
 import { URI } from "vscode-uri"
@@ -34,11 +34,11 @@ export function applyAlias({
 	)
 	const doc_parsed = matter(rawText)
 	const frontmatter = doc_parsed.data
-	if (!("title" in frontmatter)) frontmatter["title"] = alias
-	else {
-		if (!("aliases" in frontmatter)) frontmatter["aliases"] = []
-		frontmatter.aliases.push(alias)
-	}
+	const aliases = new Set(frontmatter["aliases"])
+	if ("title" in frontmatter) aliases.add(frontmatter["title"])
+	else frontmatter["title"] = alias
+	aliases.add(alias)
+	frontmatter["aliases"] = [...aliases].sort()
 	change.getTextEditChange(doc.uri).replace(
 		{
 			start: doc.positionAt(0),
