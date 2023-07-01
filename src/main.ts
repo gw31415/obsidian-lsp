@@ -9,6 +9,7 @@ import { onHover } from "./handler/hover"
 import { onDefinition } from "./handler/definition"
 import { updateObsidianNotes } from "./common/vault"
 import { validateWikiLinks } from "./handler/diagnostics"
+import { URI } from "vscode-uri"
 
 connection.onInitialize(() => ({
 	capabilities: {
@@ -36,6 +37,9 @@ connection.onCompletionResolve(onCompletionResolve)
 connection.onDefinition(onDefinition)
 connection.onHover(onHover)
 documents.onDidChangeContent((change) => validateWikiLinks(change.document))
+documents.onDidSave((change) =>
+	updateObsidianNotes(URI.parse(change.document.uri).fsPath)
+)
 
 documents.listen(connection)
 connection.listen()

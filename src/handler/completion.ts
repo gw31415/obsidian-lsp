@@ -11,7 +11,8 @@ import {
 } from "vscode-languageserver-textdocument"
 
 import { documents } from "../common/documents"
-import { ObsidianNotes } from "../common/vault"
+import { ObsidianNotes, ObsidianNote } from "../common/vault"
+import { URI } from "vscode-uri"
 
 /**
 	Returns a Range matching /\[{2}.*\]{0,2}/ around pos
@@ -63,7 +64,8 @@ export function onCompletion(
 	const range = getAroundBrackets(textDocumentPosition.position, doc)
 	if (undefined === range) return []
 
-	return ObsidianNotes.map((note) => {
+	return [...ObsidianNotes].map((uri) => {
+		const note = new ObsidianNote(URI.parse(uri))
 		const newText = note.getWikiLink()
 
 		return {

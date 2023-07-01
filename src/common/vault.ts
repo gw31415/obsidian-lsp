@@ -1,4 +1,5 @@
 import { readFileSync, readdirSync } from "fs"
+import { stat } from "fs/promises"
 import { basename, join, resolve } from "path"
 import { URI } from "vscode-uri"
 import { Position, TextDocument } from "vscode-languageserver-textdocument"
@@ -45,10 +46,7 @@ export class NoteNotFoundError extends Error {
 	Class representing Obsidian documents.
  */
 export class ObsidianNote {
-	readonly uri: URI
-	constructor(path: string) {
-		this.uri = URI.file(resolve(path))
-	}
+	constructor(readonly uri: URI) {}
 	/**
 		Get the content of Obsidian note.
 		Throws NoteNotFoundError if the file is not found.
@@ -150,51 +148,26 @@ export function getObsidianNoteFromWikiLink(link: string): ObsidianNote {
 	if (!/^\[\[[^\][]+\]\]$/.test(link)) throw new WikiLinkBrokenError(link)
 	const innerText = link.slice(2, -2)
 	if (!innerText.includes("|")) {
-		return new ObsidianNote(join(obsidianVault, `${innerText}.md`))
+		return new ObsidianNote(
+			URI.file(resolve(join(obsidianVault, `${innerText}.md`)))
+		)
 	}
 	const split = innerText.split("|")
 	if (split.length !== 2) throw new WikiLinkBrokenError(link)
-	return new ObsidianNote(join(obsidianVault, `${split[0]}.md`))
+	return new ObsidianNote(
+		URI.file(resolve(join(obsidianVault, `${split[0]}.md`)))
+	)
 }
 
 /**
 	All obsidian markdown documents in the workspace.
 */
-export const ObsidianNotes: ObsidianNote[] = []
+export const ObsidianNotes: Set<string> = new Set()
 
 /**
 	Reload ObsidianNotes scanning the workspace.
 */
-export async function updateObsidianNotes() {
-	await connection.workspace
-		.getWorkspaceFolders()
-		.then((workspaceFolders) => {
-			if (workspaceFolders === null || workspaceFolders === undefined) {
-				connection
-					.sendNotification("window/showMessage", {
-						type: 1,
-						message:
-							"Please specify the workspace to detect Obsidian Vault.",
-					})
-					.then(() => {
-						process.exit(1)
-					})
-			} else if (workspaceFolders.length !== 1) {
-				connection
-					.sendNotification("window/showMessage", {
-						type: 1,
-						message: "Only one workspace is allowed.",
-					})
-					.then(() => {
-						process.exit(1)
-					})
-			} else {
-				obsidianVault = resolve(
-					URI.parse(workspaceFolders[0].uri).fsPath
-				)
-			}
-		})
-	if (!obsidianVault) throw new VaultIsNotReadyError()
+export async function updateObsidianNotes(...paths: string[]) {
 	/**
 		A function that recursively searches for .md files.
 		@param dirPath Path to search
@@ -205,9 +178,52 @@ export async function updateObsidianNotes() {
 			if (dirent.isDirectory()) {
 				rec_getmds(join(dirPath, dirent.name))
 			} else if (dirent.isFile() && dirent.name.slice(-3) === ".md") {
-				ObsidianNotes.push(new ObsidianNote(join(dirPath, dirent.name)))
+				ObsidianNotes.add(URI.file(resolve(join(dirPath, dirent.name))).toString())
 			}
 		}
 	}
-	rec_getmds(obsidianVault)
+	if (paths.length === 0) {
+		await connection.workspace
+			.getWorkspaceFolders()
+			.then((workspaceFolders) => {
+				if (
+					workspaceFolders === null ||
+					workspaceFolders === undefined
+				) {
+					connection
+						.sendNotification("window/showMessage", {
+							type: 1,
+							message:
+								"Please specify the workspace to detect Obsidian Vault.",
+						})
+						.then(() => {
+							process.exit(1)
+						})
+				} else if (workspaceFolders.length !== 1) {
+					connection
+						.sendNotification("window/showMessage", {
+							type: 1,
+							message: "Only one workspace is allowed.",
+						})
+						.then(() => {
+							process.exit(1)
+						})
+				} else {
+					obsidianVault = resolve(
+						URI.parse(workspaceFolders[0].uri).fsPath
+					)
+				}
+			})
+		if (!obsidianVault) throw new VaultIsNotReadyError()
+		rec_getmds(obsidianVault)
+	} else {
+		for (const path of paths) {
+			const dirent = await stat(path)
+			if (dirent.isDirectory()) {
+				rec_getmds(path)
+			} else if (dirent.isFile() && path.slice(-3) === ".md") {
+				ObsidianNotes.add(URI.file(resolve(path)).toString())
+			}
+		}
+	}
 }
