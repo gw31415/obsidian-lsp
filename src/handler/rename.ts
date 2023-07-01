@@ -3,7 +3,8 @@ import {
 	WorkspaceChange,
 	WorkspaceEdit,
 } from "vscode-languageserver"
-import { read, stringify } from "gray-matter"
+import { stringify }  from "gray-matter"
+import * as matter  from "gray-matter"
 import { TextDocument } from "vscode-languageserver-textdocument"
 import { ObsidianNote } from "../common/vault"
 import { URI } from "vscode-uri"
@@ -31,7 +32,7 @@ export function applyAlias({
 		1,
 		rawText
 	)
-	const doc_parsed = read(rawText)
+	const doc_parsed = matter(rawText)
 	const frontmatter = doc_parsed.data
 	if (!("title" in frontmatter)) frontmatter["title"] = alias
 	else {

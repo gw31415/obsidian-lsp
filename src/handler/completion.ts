@@ -1,6 +1,5 @@
 import {
 	CompletionItem,
-	CompletionItemKind,
 	MarkupKind,
 	TextDocumentPositionParams,
 } from "vscode-languageserver/node"
@@ -11,8 +10,7 @@ import {
 } from "vscode-languageserver-textdocument"
 
 import { documents } from "../common/documents"
-import { ObsidianNoteUrls, ObsidianNote } from "../common/vault"
-import { URI } from "vscode-uri"
+import { ObsidianNoteCompletionItems } from "../common/vault"
 
 /**
 	Returns a Range matching /\[{2}.*\]{0,2}/ around pos
@@ -64,20 +62,13 @@ export function onCompletion(
 	const range = getAroundBrackets(textDocumentPosition.position, doc)
 	if (undefined === range) return []
 
-	return [...ObsidianNoteUrls].map((uri) => {
-		const note = new ObsidianNote(URI.parse(uri))
-		const newText = note.getWikiLink()
-
-		return {
-			data: note.content, // no throws because note is auto generated.
-			label: newText,
-			kind: CompletionItemKind.Reference,
-			textEdit: {
-				range,
-				newText,
-			},
-		}
-	})
+	return ObsidianNoteCompletionItems.map((item) => ({
+		...item,
+		textEdit: {
+			range,
+			newText: item.label,
+		},
+	}))
 }
 
 export function onCompletionResolve(item: CompletionItem): CompletionItem {

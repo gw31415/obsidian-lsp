@@ -5,6 +5,8 @@ import { URI } from "vscode-uri"
 import { Position, TextDocument } from "vscode-languageserver-textdocument"
 import { connection } from "./connection"
 import { documents } from "./documents"
+import { CompletionItem, CompletionItemKind } from "vscode-languageserver/node"
+import * as matter from "gray-matter"
 
 let obsidianVault: string | null = null
 
@@ -172,6 +174,7 @@ export function parseWikiLink(link: string): {
 	All obsidian markdown documents in the workspace.
 */
 export const ObsidianNoteUrls: Set<string> = new Set()
+export let ObsidianNoteCompletionItems: CompletionItem[] = []
 
 /**
 	Reload ObsidianNotes scanning the workspace.
@@ -189,6 +192,23 @@ export async function updateObsidianNotes(...paths: string[]) {
 			} else if (dirent.isFile() && dirent.name.slice(-3) === ".md") {
 				ObsidianNoteUrls.add(
 					URI.file(resolve(join(dirPath, dirent.name))).toString()
+				)
+				ObsidianNoteCompletionItems = [...ObsidianNoteUrls].flatMap(
+					(uri) => {
+						const note = new ObsidianNote(URI.parse(uri))
+						const content = note.content // no throws because note is auto generated.
+						const parsed = matter(content)
+						const aliases: (string | undefined)[] = [undefined]
+						if (parsed.data.aliases)
+							aliases.push(...parsed.data.aliases)
+						if (parsed.data.title) aliases.push(parsed.data.title)
+
+						return aliases.map((alias) => ({
+							data: parsed.content,
+							label: note.getWikiLink(alias),
+							kind: CompletionItemKind.Reference,
+						}))
+					}
 				)
 			}
 		}
