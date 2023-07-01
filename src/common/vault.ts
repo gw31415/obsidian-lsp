@@ -254,6 +254,23 @@ export async function updateObsidianNotes(...paths: string[]) {
 				rec_getmds(path)
 			} else if (dirent.isFile() && path.slice(-3) === ".md") {
 				ObsidianNoteUrls.add(URI.file(resolve(path)).toString())
+				ObsidianNoteCompletionItems = [...ObsidianNoteUrls].flatMap(
+					(uri) => {
+						const note = new ObsidianNote(URI.parse(uri))
+						const content = note.content // no throws because note is auto generated.
+						const parsed = matter(content)
+						const aliases: (string | undefined)[] = [undefined]
+						if (parsed.data.aliases)
+							aliases.push(...parsed.data.aliases)
+						if (parsed.data.title) aliases.push(parsed.data.title)
+
+						return aliases.map((alias) => ({
+							data: parsed.content,
+							label: note.getWikiLink(alias),
+							kind: CompletionItemKind.Reference,
+						}))
+					}
+				)
 			}
 		}
 	}
