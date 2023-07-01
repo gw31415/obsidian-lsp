@@ -10,6 +10,7 @@ import { onDefinition } from "./handler/definition"
 import { updateObsidianNotes } from "./common/vault"
 import { validateWikiLinks } from "./handler/diagnostics"
 import { URI } from "vscode-uri"
+import { onRenameRequest } from "./handler/rename"
 
 connection.onInitialize(() => ({
 	capabilities: {
@@ -19,6 +20,7 @@ connection.onInitialize(() => ({
 		},
 		hoverProvider: true,
 		definitionProvider: true,
+		renameProvider: true,
 		workspace: {
 			workspaceFolders: {
 				supported: true,
@@ -35,6 +37,7 @@ connection.onInitialized(async () => {
 connection.onCompletion(onCompletion)
 connection.onCompletionResolve(onCompletionResolve)
 connection.onDefinition(onDefinition)
+connection.onRenameRequest(onRenameRequest)
 connection.onHover(onHover)
 documents.onDidChangeContent((change) => validateWikiLinks(change.document))
 documents.onDidSave((change) =>
