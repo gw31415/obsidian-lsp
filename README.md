@@ -19,6 +19,10 @@ The Obsidian.md LSP server provides the following main features:
 -   [x] `textDocument/completion`: Provides search within the Vault and
         autocompletion of links, enabling efficient navigation within your wiki.
 
+-   [x] `textDocument/codeAction`: If the alias on WikiLink is not listed in the
+        alias settings in the document's frontmatter, add the string into the alias
+        entry in the document's frontmatter.
+
 -   [x] `textDocument/publishDiagnostics`: Detects and alerts you of broken or
         empty links, ensuring the consistency and integrity of your wiki.
 
@@ -27,6 +31,10 @@ The Obsidian.md LSP server provides the following main features:
 
 -   [x] `textDocument/hover`: Displays the content of the linked article in a
         hover-over preview, saving you the need to follow the link.
+
+-   [x] `textDocument/rename`: When Rename is performed on a document being edited,
+        the string of the renamed symbol is added to the alias. If the title has not
+        been set, it will also be set to the title of the document.
 
 -   [ ] `textDocument/references`: (Will) display a list of all articles that
         contain a link to a specific article, helping you understand the context and
