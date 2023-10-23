@@ -1,7 +1,7 @@
 {
 	"name": "obsidian-lsp",
 	"description": "LSP server for operating the note-taking system Obsidian",
-	"version": "1.0.4",
+	"version": "1.0.5",
 	"author": "Amadeus_vn",
 	"license": "MIT",
 	"engines": {
