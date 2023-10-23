@@ -1,7 +1,7 @@
 {
 	"name": "obsidian-lsp",
 	"description": "LSP server for operating the note-taking system Obsidian",
-	"version": "1.0.2",
+	"version": "1.0.3",
 	"author": "Amadeus_vn",
 	"license": "MIT",
 	"engines": {
@@ -20,6 +20,7 @@
 	},
 	"scripts": {
 		"build": "esbuild --bundle src/main.ts --outdir=out --minify --platform=node",
+		"prepare": "npm run build",
 		"dev": "ts-node src/main.ts"
 	},
 	"devDependencies": {
