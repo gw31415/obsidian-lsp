@@ -1,5 +1,12 @@
 # obsidian-lsp : Language Server for Obsidian.md
 
+## Development has stalled
+
+Updates have been delayed due to lack of time allocated for development. Furthermore, I have no plans to make this project more functional.
+If you are looking for something more versatile, I recommend [markdown-oxide](https://github.com/Feel-ix-343/markdown-oxide).
+
+---
+
 ![Screen record](https://github.com/gw31415/obsidian-lsp/assets/24710985/be3e8a1b-230a-4af0-9a0a-ea2e747eed35)
 
 ## Motivation
@@ -79,5 +86,7 @@ vim.api.nvim_create_autocmd("BufRead", {
 
 ## Related Projects
 
+-   [markdown-oxide](https://github.com/Feel-ix-343/markdown-oxide) : Better-updated
+    LSP for obsidian markdown system. I recommend to use it.
 -   [obsidian.nvim](https://github.com/epwalsh/obsidian.nvim) : The Neovim
     plugin that inspired this project
